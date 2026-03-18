@@ -1,10 +1,10 @@
-import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from src.config import settings
 from src.database import engine, Base
 from src.api.routers import auth, datasets, health
 
@@ -12,7 +12,6 @@ from src.api.routers import auth, datasets, health
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
-        # PostGIS may not be available on Railway's managed Postgres — skip if it fails
         try:
             await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
         except Exception:
@@ -21,8 +20,6 @@ async def lifespan(app: FastAPI):
     yield
     await engine.dispose()
 
-
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 app = FastAPI(
     title="GeoMarket API",
@@ -33,7 +30,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
+    allow_origins=[settings.FRONTEND_URL, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
