@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,13 +11,18 @@ from src.api.routers import auth, datasets, health
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create tables on startup (dev only — use Alembic in production)
     async with engine.begin() as conn:
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+        # PostGIS may not be available on Railway's managed Postgres — skip if it fails
+        try:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+        except Exception:
+            pass
         await conn.run_sync(Base.metadata.create_all)
     yield
     await engine.dispose()
 
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 app = FastAPI(
     title="GeoMarket API",
@@ -27,7 +33,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
