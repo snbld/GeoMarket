@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
 
 from src.config import settings
 from src.database import engine, Base
@@ -11,13 +10,6 @@ from src.api.routers import auth, datasets, health
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Try to enable PostGIS in a separate transaction
-    try:
-        async with engine.begin() as conn:
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
-    except Exception:
-        pass
-    # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield

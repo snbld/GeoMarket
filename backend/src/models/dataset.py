@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime
 
-from geoalchemy2 import Geometry
 from sqlalchemy import String, Float, DateTime, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -22,7 +21,12 @@ class Dataset(Base):
     s3_key: Mapped[str] = mapped_column(String(1000), nullable=False)
     file_size_bytes: Mapped[int | None] = mapped_column()
     thumbnail_key: Mapped[str | None] = mapped_column(String(1000))
-    coverage_area = mapped_column(Geometry("POLYGON", srid=4326), nullable=True)
+    # GeoJSON polygon stored as JSONB — migrate to PostGIS Geometry when available
+    coverage_area = mapped_column(JSONB, nullable=True)
+    bbox_west: Mapped[float | None] = mapped_column(Float)
+    bbox_south: Mapped[float | None] = mapped_column(Float)
+    bbox_east: Mapped[float | None] = mapped_column(Float)
+    bbox_north: Mapped[float | None] = mapped_column(Float)
     crs: Mapped[str | None] = mapped_column(String(50))
     metadata_json = mapped_column(JSONB, default=dict)
     status: Mapped[str] = mapped_column(String(50), default="pending")  # pending, approved, rejected

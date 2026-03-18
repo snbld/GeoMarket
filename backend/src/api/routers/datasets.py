@@ -3,9 +3,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy import select, func
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from geoalchemy2.functions import ST_MakeEnvelope, ST_Intersects
 
 from src.database import get_db
 from src.models.user import User
@@ -101,8 +100,13 @@ async def list_datasets(
     if bbox:
         parts = [float(x) for x in bbox.split(",")]
         if len(parts) == 4:
-            envelope = ST_MakeEnvelope(parts[0], parts[1], parts[2], parts[3], 4326)
-            query = query.where(ST_Intersects(Dataset.coverage_area, envelope))
+            minlon, minlat, maxlon, maxlat = parts
+            query = query.where(and_(
+                Dataset.bbox_west <= maxlon,
+                Dataset.bbox_east >= minlon,
+                Dataset.bbox_south <= maxlat,
+                Dataset.bbox_north >= minlat,
+            ))
 
     query = query.order_by(Dataset.created_at.desc()).limit(limit).offset(offset)
     result = await db.execute(query)
