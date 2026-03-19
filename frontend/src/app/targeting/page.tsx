@@ -50,7 +50,7 @@ export default function TargetingPage() {
           {/* Deposit type */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold">Deposit Type</Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {DEPOSIT_TYPES.map((dt) => (
                 <button
                   key={dt.value}

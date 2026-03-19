@@ -10,13 +10,14 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Search, Star, Loader2 } from "lucide-react";
+import { Search, Star, Loader2, MapIcon, List } from "lucide-react";
 
 export default function MarketplacePage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
 
@@ -37,6 +38,13 @@ export default function MarketplacePage() {
     return () => { map.remove(); mapRef.current = null; };
   }, []);
 
+  // Resize map when toggling mobile view
+  useEffect(() => {
+    if (mobileView === "map" && mapRef.current) {
+      setTimeout(() => mapRef.current?.resize(), 100);
+    }
+  }, [mobileView]);
+
   const filtered = datasets.filter((d) => {
     const matchesFilter = !filter || d.data_type === filter;
     const matchesSearch = !search || d.title.toLowerCase().includes(search.toLowerCase()) || d.description?.toLowerCase().includes(search.toLowerCase());
@@ -44,9 +52,33 @@ export default function MarketplacePage() {
   });
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
+      {/* Mobile toggle */}
+      <div className="md:hidden flex border-b border-border/60 bg-background">
+        <button
+          onClick={() => setMobileView("list")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+            mobileView === "list" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"
+          }`}
+        >
+          <List className="h-4 w-4" />
+          Datasets
+        </button>
+        <button
+          onClick={() => setMobileView("map")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+            mobileView === "map" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"
+          }`}
+        >
+          <MapIcon className="h-4 w-4" />
+          Map
+        </button>
+      </div>
+
       {/* Left panel */}
-      <div className="w-[440px] flex-shrink-0 border-r border-border/60 overflow-y-auto bg-background">
+      <div className={`w-full md:w-[440px] flex-shrink-0 md:border-r border-border/60 overflow-y-auto bg-background ${
+        mobileView === "map" ? "hidden md:block" : ""
+      }`}>
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/40 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold">Marketplace</h1>
@@ -118,7 +150,7 @@ export default function MarketplacePage() {
                       <span className="text-base font-bold text-primary">${d.price}</span>
                     </div>
                   </div>
-                  <div className="mt-3 flex items-center gap-1.5">
+                  <div className="mt-3 flex items-center gap-1.5 flex-wrap">
                     <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5">
                       {d.data_type}
                     </Badge>
@@ -140,7 +172,9 @@ export default function MarketplacePage() {
       </div>
 
       {/* Map */}
-      <div ref={mapContainer} className="flex-1" />
+      <div ref={mapContainer} className={`flex-1 min-h-[300px] ${
+        mobileView === "list" ? "hidden md:block" : ""
+      }`} />
     </div>
   );
 }

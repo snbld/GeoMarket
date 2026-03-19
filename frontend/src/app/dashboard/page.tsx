@@ -28,22 +28,24 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Welcome back, {user.full_name}</p>
         </div>
         <div className="flex gap-3">
           <Link href="/sell">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" size="sm">
               <Layers className="h-4 w-4" />
-              List Dataset
+              <span className="hidden sm:inline">List Dataset</span>
+              <span className="sm:hidden">Sell</span>
             </Button>
           </Link>
           <Link href="/targeting">
-            <Button className="bg-primary hover:bg-primary/90 gap-2">
+            <Button className="bg-primary hover:bg-primary/90 gap-2" size="sm">
               <Brain className="h-4 w-4" />
-              New AI Run
+              <span className="hidden sm:inline">New AI Run</span>
+              <span className="sm:hidden">AI Run</span>
             </Button>
           </Link>
         </div>
@@ -155,7 +157,7 @@ export default function DashboardPage() {
               <CardDescription>Revenue from your dataset sales</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div className="text-center p-4 rounded-xl bg-muted/50">
                   <div className="text-2xl font-bold">$0.00</div>
                   <div className="text-sm text-muted-foreground mt-1">Total Earned</div>

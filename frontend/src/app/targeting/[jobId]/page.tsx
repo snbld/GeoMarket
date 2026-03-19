@@ -1,20 +1,46 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Download, FileImage, FileSpreadsheet, FileText, Loader2, Crosshair, MapPin } from "lucide-react";
+import { ArrowLeft, FileImage, FileSpreadsheet, FileText, Loader2, Crosshair, MapPin, MapIcon, List } from "lucide-react";
 
 export default function AIResultsPage() {
   const params = useParams();
+  const [mobileView, setMobileView] = useState<"results" | "map">("results");
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)]">
+      {/* Mobile toggle */}
+      <div className="md:hidden flex border-b border-border/60 bg-background">
+        <button
+          onClick={() => setMobileView("results")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+            mobileView === "results" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"
+          }`}
+        >
+          <List className="h-4 w-4" />
+          Results
+        </button>
+        <button
+          onClick={() => setMobileView("map")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+            mobileView === "map" ? "text-primary border-b-2 border-primary" : "text-muted-foreground"
+          }`}
+        >
+          <MapIcon className="h-4 w-4" />
+          Map
+        </button>
+      </div>
+
       {/* Results sidebar */}
-      <div className="w-[400px] flex-shrink-0 border-r border-border/60 overflow-y-auto bg-background">
+      <div className={`w-full md:w-[400px] flex-shrink-0 md:border-r border-border/60 overflow-y-auto bg-background ${
+        mobileView === "map" ? "hidden md:block" : ""
+      }`}>
         <div className="p-5 space-y-5">
           {/* Back link */}
           <Link href="/targeting" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -26,9 +52,9 @@ export default function AIResultsPage() {
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-xl font-bold tracking-tight">AI Results</h1>
-              <p className="text-xs text-muted-foreground mt-1 font-mono">Job {params.jobId}</p>
+              <p className="text-xs text-muted-foreground mt-1 font-mono break-all">Job {params.jobId}</p>
             </div>
-            <Badge className="bg-amber-100 text-amber-700 border-0 gap-1">
+            <Badge className="bg-amber-100 text-amber-700 border-0 gap-1 flex-shrink-0">
               <Loader2 className="h-3 w-3 animate-spin" />
               Processing
             </Badge>
@@ -76,8 +102,10 @@ export default function AIResultsPage() {
       </div>
 
       {/* Map area */}
-      <div className="flex-1 bg-muted/30 flex items-center justify-center">
-        <div className="text-center">
+      <div className={`flex-1 bg-muted/30 flex items-center justify-center min-h-[300px] ${
+        mobileView === "results" ? "hidden md:flex" : ""
+      }`}>
+        <div className="text-center px-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground mx-auto mb-4">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
